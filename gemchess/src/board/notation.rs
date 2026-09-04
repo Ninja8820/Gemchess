@@ -82,11 +82,12 @@ impl Board {
             } else {
                 pgn.push_str("1-0");
             }
-        } else if matches!(state, GameState::Stalemate(_)) 
-            || state == GameState::FiftyMoveRule 
-            || state == GameState::InsufficientMaterial 
-            || state == GameState::ThreeRepetition {
-                pgn.push_str("1/2-1/2");
+        } else if matches!(state, GameState::Stalemate(_))
+            || state == GameState::FiftyMoveRule
+            || state == GameState::InsufficientMaterial
+            || state == GameState::ThreeRepetition
+        {
+            pgn.push_str("1/2-1/2");
         } else {
             pgn.push('*');
         }
@@ -96,7 +97,7 @@ impl Board {
     /// Attempts to create an internal move from a string in Standard Algebraic Notation ( SAN )
     pub fn move_from_algebraic(&self, s: &str) -> Option<Move> {
         if s.is_empty() {
-            return None
+            return None;
         }
 
         let s = s.trim().trim_end_matches(['+', '#', '?', '!']);
@@ -128,25 +129,24 @@ impl Board {
             let first = s.chars().nth(0)?;
             let last = s.chars().last()?;
             let promotion = Piece::from_san(last);
-            let dest = Tile::from_str(&s[len-4..len-2])?;
+            let dest = Tile::from_str(&s[len - 4..len - 2])?;
 
-
-            let source = Tile::new_chars(first, if self.turn.white() {'7'} else {'2'})?;
+            let source = Tile::new_chars(first, if self.turn.white() { '7' } else { '2' })?;
 
             return Some(self.create_move(
-                source, 
-                dest, 
-                Piece::Pawn, 
-                self.get_piece_at_tile(dest).map(|(p, _)| p), 
-                Some(promotion)
-            ))
+                source,
+                dest,
+                Piece::Pawn,
+                self.get_piece_at_tile(dest).map(|(p, _)| p),
+                Some(promotion),
+            ));
         }
 
         match len {
             2 => {
                 // Pawn move
                 // e4, d4
-                let dest = Tile::from_str(s)?; 
+                let dest = Tile::from_str(s)?;
                 let mut bb = Bitboard::EMPTY;
                 if let Some(t1) = dest.backward(self.turn) {
                     bb.set_bit(t1, true);
@@ -155,14 +155,8 @@ impl Board {
                     }
                 }
                 bb &= player.bb[Piece::Pawn as usize];
-                Some(self.create_move(
-                    bb.to_bit().unwrap(), 
-                    dest,
-                    Piece::Pawn, 
-                    None, 
-                    None
-                ))
-            },
+                Some(self.create_move(bb.to_bit().unwrap(), dest, Piece::Pawn, None, None))
+            }
             3 => {
                 // Normal move
                 // Nc3, Bc4
@@ -170,23 +164,28 @@ impl Board {
                 let piece = Piece::from_san(first);
                 let dest = Tile::from_str(&s[1..])?;
 
-                Some(self.create_move(
-                    (player.bb[piece as usize] & self.generate_attacks_from_piece(dest, piece, !self.turn, None)).to_bit().unwrap(), 
-                    dest, 
-                    piece, 
-                    None, 
-                    None
-                ))
-            },
+                Some(
+                    self.create_move(
+                        (player.bb[piece as usize]
+                            & self.generate_attacks_from_piece(dest, piece, !self.turn, None))
+                        .to_bit()
+                        .unwrap(),
+                        dest,
+                        piece,
+                        None,
+                        None,
+                    ),
+                )
+            }
             4 => {
                 // Captures or Single disambiguation
                 // exd4, Bxd4, Nfd4
                 let first = s.chars().nth(0)?;
                 let piece = Piece::from_san(first);
-                let dest = Tile::from_str(&s[len-2..])?;
+                let dest = Tile::from_str(&s[len - 2..])?;
                 let from = if is_capture {
-                    let mut bb = player.bb[piece as usize] & 
-                        self.generate_attacks_from_piece(dest, piece, !self.turn, None);
+                    let mut bb = player.bb[piece as usize]
+                        & self.generate_attacks_from_piece(dest, piece, !self.turn, None);
 
                     if piece == Piece::Pawn {
                         bb &= Bitboard::file_from_char(first)
@@ -194,56 +193,56 @@ impl Board {
                     bb.to_bit()?
                 } else {
                     let piece = Piece::from_san(first);
-                    (player.bb[piece as usize] & 
-                        self.generate_attacks_from_piece(dest, piece, !self.turn, None) &
-                        Bitboard::file_from_char(s.chars().nth(1)?))
-                        .to_bit()?
+                    (player.bb[piece as usize]
+                        & self.generate_attacks_from_piece(dest, piece, !self.turn, None)
+                        & Bitboard::file_from_char(s.chars().nth(1)?))
+                    .to_bit()?
                 };
                 Some(self.create_move(
-                    from, 
-                    dest, 
-                    piece, 
-                    self.get_piece_at_tile(dest).map(|(p, _)| p), 
-                    None
+                    from,
+                    dest,
+                    piece,
+                    self.get_piece_at_tile(dest).map(|(p, _)| p),
+                    None,
                 ))
-            },
+            }
             5 => {
                 // Double disambiguation, Single disambiguation capture
                 // Nd2e4, Nfxe4
 
                 let first = s.chars().nth(0)?;
                 let piece = Piece::from_san(first);
-                let dest = Tile::from_str(&s[len-2..])?;
+                let dest = Tile::from_str(&s[len - 2..])?;
                 let from = if is_capture {
-                    (player.bb[piece as usize] & 
-                        self.generate_attacks_from_piece(dest, piece, !self.turn, None) &
-                        Bitboard::file_from_char(s.chars().nth(1)?))
-                        .to_bit()?
+                    (player.bb[piece as usize]
+                        & self.generate_attacks_from_piece(dest, piece, !self.turn, None)
+                        & Bitboard::file_from_char(s.chars().nth(1)?))
+                    .to_bit()?
                 } else {
                     Tile::from_str(&s[1..3])?
                 };
                 Some(self.create_move(
-                    from, 
-                    dest, 
-                    piece, 
-                    self.get_piece_at_tile(dest).map(|(p, _)| p), 
-                    None
+                    from,
+                    dest,
+                    piece,
+                    self.get_piece_at_tile(dest).map(|(p, _)| p),
+                    None,
                 ))
-            },
+            }
             6 => {
                 // Double disambiguation capture
                 // Nd2xe4
 
                 let first = s.chars().nth(0)?;
                 let piece = Piece::from_san(first);
-                let dest = Tile::from_str(&s[len-2..])?;
+                let dest = Tile::from_str(&s[len - 2..])?;
                 let from = Tile::from_str(&s[1..3])?;
                 Some(self.create_move(
-                    from, 
-                    dest, 
-                    piece, 
-                    self.get_piece_at_tile(dest).map(|(p, _)| p), 
-                    None
+                    from,
+                    dest,
+                    piece,
+                    self.get_piece_at_tile(dest).map(|(p, _)| p),
+                    None,
                 ))
             }
             _ => None,
@@ -268,15 +267,15 @@ impl Board {
         let disambig = self.get_disambig(mov);
 
         SanMove::new(
-            piece, 
-            disambig, 
-            capture, 
-            to, 
-            promo, 
-            is_kingside_castle, 
-            is_queenside_castle, 
-            false, 
-            false
+            piece,
+            disambig,
+            capture,
+            to,
+            promo,
+            is_kingside_castle,
+            is_queenside_castle,
+            false,
+            false,
         )
     }
 
@@ -292,12 +291,12 @@ impl Board {
         if piece == Piece::King {
             return None;
         }
-        
+
         if piece == Piece::Pawn {
             if mov.capture().is_none() {
                 return None;
             } else {
-                return Some(Disambig::File(from_file))
+                return Some(Disambig::File(from_file));
             }
         }
         let (player, _) = self.current_players();
@@ -352,7 +351,7 @@ impl Board {
                     }
                 }
             }
-            output.push_str("|");
+            output.push('|');
         }
         output.push_str("  +------------------------+\n");
         output.push_str("    a  b  c  d  e  f  g  h\n");
@@ -379,7 +378,6 @@ impl Board {
         output.push_str("    a  b  c  d  e  f  g  h\n");
         output
     }
-
 }
 impl fmt::Display for Board {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

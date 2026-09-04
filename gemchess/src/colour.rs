@@ -1,8 +1,7 @@
 use std::{fmt::Display, ops::Not};
 
-#[derive(PartialEq, Eq, Debug, Clone, Copy)]
-pub enum Colour
-{
+#[derive(PartialEq, Eq, Debug, Clone, Copy, Hash)]
+pub enum Colour {
     White,
     Black,
 }
@@ -20,8 +19,7 @@ impl Colour {
         }
     }
 }
-impl Display for Colour
-{
+impl Display for Colour {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let c = match self {
             Colour::White => 'w',
@@ -31,8 +29,7 @@ impl Display for Colour
         Ok(())
     }
 }
-impl Not for Colour
-{
+impl Not for Colour {
     type Output = Colour;
 
     fn not(self) -> Self::Output {

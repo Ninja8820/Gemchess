@@ -4,7 +4,7 @@ mod constants;
 #[cfg(test)]
 mod tests;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Player {
     pub bb: [Bitboard; 6],
     pub pieces: Bitboard,
@@ -47,17 +47,13 @@ impl Player {
         }
     }
 
-    
     // Modifications
-    /// Attempts to remove any piece at a given tile, returning 
+    /// Attempts to remove any piece at a given tile, returning
     /// what type of piece was removed, if any
     pub fn remove_piece(&mut self, tile: Tile) -> Option<Piece> {
-        for piece in Piece::ALL_PIECES {
-            if self.remove_piece_type(piece, tile) {
-                return Some(piece)
-            }
-        }
-        None
+        Piece::ALL_PIECES
+            .into_iter()
+            .find(|&piece| self.remove_piece_type(piece, tile))
     }
 
     /// Attempts to remove a specific piece type from a tile
@@ -68,10 +64,10 @@ impl Player {
             self.pieces.set_bit(tile, false);
             return true;
         }
-        
+
         false
     }
-    
+
     pub fn place_piece(&mut self, piece: Piece, tile: Tile) {
         self.bb[piece as usize].set_bit(tile, true);
         self.pieces.set_bit(tile, true);
@@ -82,7 +78,7 @@ impl Player {
             self.place_piece(p, to);
         }
     }
-    
+
     // Accessors
 
     /// Returns all occupied tiles, excluding the king

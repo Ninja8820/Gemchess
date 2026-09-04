@@ -2,9 +2,9 @@ use crate::Tile;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Disambig {
-    File(u8),        
-    Rank(u8),        
-    FileRank(Tile) 
+    File(u8),
+    Rank(u8),
+    FileRank(Tile),
 }
 
 impl std::fmt::Display for Disambig {

@@ -1,6 +1,5 @@
 use crate::{Bitboard, Tile};
 
-
 #[test]
 fn set_get_bit() {
     let tile = Tile::new_index(5).unwrap();

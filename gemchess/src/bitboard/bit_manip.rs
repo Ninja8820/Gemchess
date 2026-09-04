@@ -58,7 +58,6 @@ impl Not for Bitboard {
     }
 }
 
-
 // SHIFTS ( << | >> )
 impl Shl<u8> for Bitboard {
     type Output = Self;

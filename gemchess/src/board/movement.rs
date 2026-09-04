@@ -1,4 +1,7 @@
-use crate::{zobrist::consts::{CASTLING, EN_PASSANT, PIECE_SQUARE, SIDE_TO_MOVE}, Board, CastlingRights, Colour, History, Move, MoveError, MoveList, MoveResult, Piece, Tile};
+use crate::{
+    Board, CastlingRights, Colour, History, Move, MoveError, MoveList, MoveResult, Piece, Tile,
+    zobrist::consts::{CASTLING, EN_PASSANT, PIECE_SQUARE, SIDE_TO_MOVE},
+};
 
 impl Board {
     /// Attempts to create & make an internal move given the starting & ending tile
@@ -8,36 +11,36 @@ impl Board {
         &mut self,
         from: Tile,
         to: Tile,
-        promotion: Option<Piece>
+        promotion: Option<Piece>,
     ) -> Result<MoveResult, MoveError> {
         if let Some(p) = promotion {
             let mov = self.create_move(
-                from, 
-                to, 
-                self.get_piece_at_tile(from).unwrap().0, 
-                self.get_piece_at_tile(to).map(|(p, _)| p), 
-                Some(p)
+                from,
+                to,
+                self.get_piece_at_tile(from).unwrap().0,
+                self.get_piece_at_tile(to).map(|(p, _)| p),
+                Some(p),
             );
             self.make_move_unchecked(mov);
-            return Ok(MoveResult::MoveApplied(self.get_state()))
+            return Ok(MoveResult::MoveApplied(self.get_state()));
         }
         if from == to {
             return Err(MoveError::SameTile);
         }
-        
+
         if self.is_in_checkmate(self.turn) {
             return Err(MoveError::Checkmate);
         }
         if self.is_stalemate(self.turn) {
             return Err(MoveError::Stalemate);
         }
-        
+
         let result = self.get_piece_at_tile(from);
         if let Some((p, w)) = result {
             if w != self.turn {
                 return Err(MoveError::WrongTurn);
             }
-            
+
             let capture = match self.get_piece_at_tile(to) {
                 Some((p, w)) => {
                     if w == self.turn {
@@ -72,13 +75,13 @@ impl Board {
             }
 
             if promote == Some(Piece::Queen) && promotion.is_none() {
-                return Ok(MoveResult::PromotionNeeded(to))
+                return Ok(MoveResult::PromotionNeeded(to));
             }
             self.make_move_unchecked(mov);
 
-            return Ok(MoveResult::MoveApplied(self.get_state()));
+            Ok(MoveResult::MoveApplied(self.get_state()))
         } else {
-            return Err(MoveError::NoPieceSelected);
+            Err(MoveError::NoPieceSelected)
         }
     }
 
@@ -172,23 +175,31 @@ impl Board {
             match (self.turn, mov.from(), mov.to()) {
                 (Colour::White, Tile::E1, Tile::G1) => {
                     player.move_piece(Tile::H1, Tile::F1);
-                    self.zobrist_hash ^= PIECE_SQUARE[Piece::Rook.to_zobrist_index(self.turn)][Tile::H1];
-                    self.zobrist_hash ^= PIECE_SQUARE[Piece::Rook.to_zobrist_index(self.turn)][Tile::F1];
+                    self.zobrist_hash ^=
+                        PIECE_SQUARE[Piece::Rook.to_zobrist_index(self.turn)][Tile::H1];
+                    self.zobrist_hash ^=
+                        PIECE_SQUARE[Piece::Rook.to_zobrist_index(self.turn)][Tile::F1];
                 }
                 (Colour::White, Tile::E1, Tile::C1) => {
                     player.move_piece(Tile::A1, Tile::D1);
-                    self.zobrist_hash ^= PIECE_SQUARE[Piece::Rook.to_zobrist_index(self.turn)][Tile::A1];
-                    self.zobrist_hash ^= PIECE_SQUARE[Piece::Rook.to_zobrist_index(self.turn)][Tile::D1];
+                    self.zobrist_hash ^=
+                        PIECE_SQUARE[Piece::Rook.to_zobrist_index(self.turn)][Tile::A1];
+                    self.zobrist_hash ^=
+                        PIECE_SQUARE[Piece::Rook.to_zobrist_index(self.turn)][Tile::D1];
                 }
                 (Colour::Black, Tile::E8, Tile::G8) => {
                     player.move_piece(Tile::H8, Tile::F8);
-                    self.zobrist_hash ^= PIECE_SQUARE[Piece::Rook.to_zobrist_index(self.turn)][Tile::H8];
-                    self.zobrist_hash ^= PIECE_SQUARE[Piece::Rook.to_zobrist_index(self.turn)][Tile::F8];
+                    self.zobrist_hash ^=
+                        PIECE_SQUARE[Piece::Rook.to_zobrist_index(self.turn)][Tile::H8];
+                    self.zobrist_hash ^=
+                        PIECE_SQUARE[Piece::Rook.to_zobrist_index(self.turn)][Tile::F8];
                 }
                 (Colour::Black, Tile::E8, Tile::C8) => {
                     player.move_piece(Tile::A8, Tile::D8);
-                    self.zobrist_hash ^= PIECE_SQUARE[Piece::Rook.to_zobrist_index(self.turn)][Tile::A8];
-                    self.zobrist_hash ^= PIECE_SQUARE[Piece::Rook.to_zobrist_index(self.turn)][Tile::D8];
+                    self.zobrist_hash ^=
+                        PIECE_SQUARE[Piece::Rook.to_zobrist_index(self.turn)][Tile::A8];
+                    self.zobrist_hash ^=
+                        PIECE_SQUARE[Piece::Rook.to_zobrist_index(self.turn)][Tile::D8];
                 }
                 _ => {}
             }
@@ -235,7 +246,7 @@ impl Board {
         } else if self.is_in_check(self.turn) {
             san.set_check(true);
         }
-        
+
         // Save to history (with original Zobrist hash)
         self.history.push(History::new(mov, hash, san));
     }
@@ -247,7 +258,7 @@ impl Board {
                 Colour::Black => {
                     self.full_move -= 1;
                     (&mut self.black, &mut self.white)
-                },
+                }
             };
             if last_move.promoted_to().is_some() {
                 player.remove_piece(last_move.to());
@@ -259,10 +270,7 @@ impl Board {
                 if last_move.piece() == Piece::Pawn
                     && last_move.en_passant() == Some(last_move.to())
                 {
-                    opponent.place_piece(
-                        Piece::Pawn,
-                        last_move.to().backward(!self.turn).unwrap(),
-                    );
+                    opponent.place_piece(Piece::Pawn, last_move.to().backward(!self.turn).unwrap());
                 } else {
                     opponent.place_piece(captured, last_move.to());
                 }

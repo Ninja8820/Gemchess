@@ -82,23 +82,24 @@ impl Board {
     /// Returns whether true if no pawn move or capture has been made
     /// in the past 50 moves
     pub fn fifty_move_rule(&self) -> bool {
-        self.half_moves >= 100 
+        self.half_moves >= 100
     }
 
     /// Returns whether or not the same position has been reached 3 times
     /// throughout the process of the game
     pub fn three_fold_rep(&self) -> bool {
         let current = self.to_zobrist_hash();
-        self.repetition_history.iter()
+        self.repetition_history
+            .iter()
             .filter(|&&hash| hash == current)
             .take(3)
-            .count() == 3
+            .count()
+            == 3
     }
 
     /// Returns a draw if either opponent does not have the required material
     /// to perform a checkmate e.g. only a knight or same coloured bishops
-    pub fn insufficient_material(&self) -> bool
-    {
+    pub fn insufficient_material(&self) -> bool {
         let white_pieces = self.white.pieces.count_ones();
         let black_pieces = self.black.pieces.count_ones();
 
@@ -111,28 +112,25 @@ impl Board {
         match (white_pieces - 1, black_pieces - 1) {
             (1, 1) => true,
             (2, 1) | (1, 2) => {
-                if white_knights > 0 || black_knights > 0 || white_bishops > 0 || black_bishops > 0 {
-                    true
-                } else {
-                    false
-                }
+                white_knights > 0 || black_knights > 0 || white_bishops > 0 || black_bishops > 0
             }
-            (2, 2) => {
-                if white_bishops > 0 && black_bishops > 0 {
-                    let white_colour = self.white.bb[Piece::Bishop as usize].to_bit().unwrap().is_light_square();
-                    let black_colour = self.black.bb[Piece::Bishop as usize].to_bit().unwrap().is_light_square();
-                    white_colour == black_colour
-                } else {
-                    false
-                }
+            (2, 2) if white_bishops > 0 && black_bishops > 0 => {
+                let white_colour = self.white.bb[Piece::Bishop as usize]
+                    .to_bit()
+                    .unwrap()
+                    .is_light_square();
+                let black_colour = self.black.bb[Piece::Bishop as usize]
+                    .to_bit()
+                    .unwrap()
+                    .is_light_square();
+                white_colour == black_colour
             }
             _ => false,
         }
     }
 
     /// Returns the current state of the board when the function is called
-    pub fn get_state(&self) -> GameState
-    {
+    pub fn get_state(&self) -> GameState {
         let white = self.turn;
         if self.is_in_checkmate(white) {
             GameState::Checkmate(white)

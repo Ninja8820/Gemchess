@@ -38,7 +38,7 @@ impl Board {
         for &m in moves.iter() {
             self.make_move_unchecked(m);
             positions += self.positions(depth - 1);
-            println!("{}, {}", self.move_to_san(&m), &positions);
+            println!("{}, {}", self.move_to_san(&m), positions);
             self.undo_move();
         }
 

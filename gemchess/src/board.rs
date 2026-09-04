@@ -8,8 +8,8 @@ pub mod attackgen;
 pub mod capgen;
 
 pub mod debug;
-pub mod notation;
 pub mod helper;
+pub mod notation;
 
 #[cfg(test)]
 mod tests;
@@ -28,7 +28,7 @@ pub struct Board {
 
     pub zobrist_hash: Bitboard,
 
-    // Store move & its S.A.N string & zobrist hash while we have context 
+    // Store move & its S.A.N string & zobrist hash while we have context
     pub history: Vec<History>,
     repetition_history: Vec<Bitboard>,
 

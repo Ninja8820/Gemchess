@@ -21,7 +21,7 @@ pub fn between(a: u8, b: u8) -> u64 {
     let mut x = ax as i8 + step_x;
     let mut y = ay as i8 + step_y;
     while (x, y) != (bx as i8, by as i8) {
-        mask |= 1u64 << y * 8 + x;
+        mask |= 1u64 << (y * 8 + x);
         x += step_x;
         y += step_y;
     }
@@ -55,8 +55,14 @@ pub fn knight(t: u8) -> u64 {
     let y = (t / 8) as i8;
 
     const OFFSETS: [(i8, i8); 8] = [
-        (1, 2), (2, 1), (2, -1), (1, -2),
-        (-1, -2), (-2, -1), (-2, 1), (-1, 2),
+        (1, 2),
+        (2, 1),
+        (2, -1),
+        (1, -2),
+        (-1, -2),
+        (-2, -1),
+        (-2, 1),
+        (-1, 2),
     ];
 
     let mut mask = 0u64;

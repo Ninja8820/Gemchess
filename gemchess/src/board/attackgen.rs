@@ -49,7 +49,7 @@ impl Board {
             Piece::King => tile.king_attacks(),
         }
     }
-    
+
     /// Generates a bitboard representing the orthogonal and/or diagonal attacks for a specific tile
     pub fn generate_sliding_attacks(
         &self,

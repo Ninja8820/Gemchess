@@ -1,6 +1,5 @@
 use crate::CastlingRights;
 
-
 #[test]
 fn insert() {
     let mut rights = CastlingRights::NONE;

@@ -78,7 +78,6 @@ impl Rng {
     }
 }
 
-
 fn find_magic(t: u8, mask: u64, dirs: &[(i8, i8); 4], rng: &mut Rng) -> (u64, u8, Vec<u64>) {
     let bits = mask.count_ones();
     let shift = 64 - bits as u8;
@@ -109,11 +108,14 @@ fn find_magic(t: u8, mask: u64, dirs: &[(i8, i8); 4], rng: &mut Rng) -> (u64, u8
         }
 
         if ok {
-            return (magic, shift, table.into_iter().map(|v| v.unwrap_or(0)).collect());
+            return (
+                magic,
+                shift,
+                table.into_iter().map(|v| v.unwrap_or(0)).collect(),
+            );
         }
     }
 }
-
 
 pub fn rook_magic_body() -> Result<String, Error> {
     magic_body("ROOK", &ROOK_DIRS, 0x1234_5678_9abc_def0)
@@ -138,7 +140,10 @@ fn magic_body(name: &str, dirs: &[(i8, i8); 4], seed: u64) -> Result<String, Err
 
     let mut out = String::new();
 
-    writeln!(out, "pub const {name}_MAGICS: TileMap<MagicEntry> = TileMap::new([")?;
+    writeln!(
+        out,
+        "pub const {name}_MAGICS: TileMap<MagicEntry> = TileMap::new(["
+    )?;
     for (mask, magic, shift, offset) in &entries {
         writeln!(
             out,
@@ -147,7 +152,11 @@ fn magic_body(name: &str, dirs: &[(i8, i8); 4], seed: u64) -> Result<String, Err
     }
     writeln!(out, "]);\n")?;
 
-    writeln!(out, "pub const {name}_ATTACKS: [Bitboard; {}] = [", flat.len())?;
+    writeln!(
+        out,
+        "pub const {name}_ATTACKS: [Bitboard; {}] = [",
+        flat.len()
+    )?;
     for bb in &flat {
         writeln!(out, "    Bitboard::new(0x{bb:016x}),")?;
     }

@@ -4,7 +4,7 @@ mod constants;
 #[cfg(test)]
 mod tests;
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub struct CastlingRights(u8);
 
 impl CastlingRights {

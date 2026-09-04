@@ -8,6 +8,12 @@ pub struct MoveList {
     len: usize,
 }
 
+impl Default for MoveList {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MoveList {
     pub fn new() -> Self {
         Self {
@@ -43,8 +49,7 @@ impl MoveList {
         self.moves.contains(mov)
     }
 }
-impl Index<usize> for MoveList
-{
+impl Index<usize> for MoveList {
     type Output = Move;
 
     fn index(&self, index: usize) -> &Self::Output {

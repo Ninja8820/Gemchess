@@ -21,7 +21,9 @@ impl<T> IndexMut<Tile> for TileMap<T> {
 }
 
 impl<T: Copy + Default> TileMap<T> {
-    pub fn empty() -> Self { TileMap([T::default(); 64]) }
+    pub fn empty() -> Self {
+        TileMap([T::default(); 64])
+    }
 }
 
 impl<T> TileMap<T> {

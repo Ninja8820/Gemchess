@@ -113,13 +113,7 @@ fn captures() {
 #[test]
 fn parse_san_pawn_move() {
     let board = Board::new();
-    let expected = board.create_move(
-        Tile::E2, 
-        Tile::E4, 
-        Piece::Pawn, 
-        None, 
-        None
-    );
+    let expected = board.create_move(Tile::E2, Tile::E4, Piece::Pawn, None, None);
 
     let actual = board.move_from_algebraic("e4");
 
@@ -128,13 +122,7 @@ fn parse_san_pawn_move() {
 #[test]
 fn parse_san_move() {
     let board = Board::new();
-    let expected = board.create_move(
-        Tile::B1, 
-        Tile::C3, 
-        Piece::Knight, 
-        None, 
-        None
-    );
+    let expected = board.create_move(Tile::B1, Tile::C3, Piece::Knight, None, None);
 
     let actual = board.move_from_algebraic("Nc3");
 
@@ -145,13 +133,7 @@ fn parse_san_move() {
 fn parse_san_promotion() {
     let mut board = Board::new_empty();
     board.white.place_piece(Piece::Pawn, Tile::E7);
-    let expected = board.create_move(
-        Tile::E7, 
-        Tile::E8, 
-        Piece::Pawn, 
-        None, 
-        Some(Piece::Queen)
-    );
+    let expected = board.create_move(Tile::E7, Tile::E8, Piece::Pawn, None, Some(Piece::Queen));
 
     let actual = board.move_from_algebraic("e8=Q");
 
@@ -163,11 +145,11 @@ fn parse_san_promotion_capture() {
     board.white.place_piece(Piece::Pawn, Tile::D7);
     board.black.place_piece(Piece::Queen, Tile::E8);
     let expected = board.create_move(
-        Tile::D7, 
-        Tile::E8, 
-        Piece::Pawn, 
-        Some(Piece::Queen), 
-        Some(Piece::Queen)
+        Tile::D7,
+        Tile::E8,
+        Piece::Pawn,
+        Some(Piece::Queen),
+        Some(Piece::Queen),
     );
 
     let actual = board.move_from_algebraic("dxe8=Q");
@@ -179,13 +161,7 @@ fn parse_san_pawn_capture() {
     let mut board = Board::new_empty();
     board.white.place_piece(Piece::Pawn, Tile::D6);
     board.black.place_piece(Piece::Queen, Tile::E7);
-    let expected = board.create_move(
-        Tile::D6, 
-        Tile::E7, 
-        Piece::Pawn, 
-        Some(Piece::Queen), 
-        None
-    );
+    let expected = board.create_move(Tile::D6, Tile::E7, Piece::Pawn, Some(Piece::Queen), None);
 
     let actual = board.move_from_algebraic("dxe7");
 
@@ -196,13 +172,7 @@ fn parse_san_capture() {
     let mut board = Board::new_empty();
     board.white.place_piece(Piece::Bishop, Tile::A1);
     board.black.place_piece(Piece::Rook, Tile::D4);
-    let expected = board.create_move(
-        Tile::A1, 
-        Tile::D4, 
-        Piece::Bishop, 
-        Some(Piece::Rook), 
-        None
-    );
+    let expected = board.create_move(Tile::A1, Tile::D4, Piece::Bishop, Some(Piece::Rook), None);
 
     let actual = board.move_from_algebraic("Bxd4");
 
@@ -214,13 +184,7 @@ fn parse_san_single_disambiguation() {
     let mut board = Board::new_empty();
     board.white.place_piece(Piece::Knight, Tile::D2);
     board.white.place_piece(Piece::Knight, Tile::F6);
-    let expected = board.create_move(
-        Tile::D2, 
-        Tile::E4, 
-        Piece::Knight, 
-        None, 
-        None
-    );
+    let expected = board.create_move(Tile::D2, Tile::E4, Piece::Knight, None, None);
 
     let actual = board.move_from_algebraic("Nde4");
 
@@ -232,13 +196,7 @@ fn parse_san_single_disambiguation_capture() {
     board.white.place_piece(Piece::Knight, Tile::D2);
     board.white.place_piece(Piece::Knight, Tile::F6);
     board.black.place_piece(Piece::Rook, Tile::E4);
-    let expected = board.create_move(
-        Tile::D2, 
-        Tile::E4, 
-        Piece::Knight, 
-        Some(Piece::Rook), 
-        None
-    );
+    let expected = board.create_move(Tile::D2, Tile::E4, Piece::Knight, Some(Piece::Rook), None);
 
     let actual = board.move_from_algebraic("Ndxe4");
 
@@ -250,13 +208,7 @@ fn parse_san_double_disambiguation() {
     board.white.place_piece(Piece::Knight, Tile::D2);
     board.white.place_piece(Piece::Knight, Tile::D6);
     board.white.place_piece(Piece::Knight, Tile::F6);
-    let expected = board.create_move(
-        Tile::D2, 
-        Tile::E4, 
-        Piece::Knight, 
-        None, 
-        None
-    );
+    let expected = board.create_move(Tile::D2, Tile::E4, Piece::Knight, None, None);
 
     let actual = board.move_from_algebraic("Nd2e4");
 
@@ -269,13 +221,7 @@ fn parse_san_double_disambiguation_capture() {
     board.white.place_piece(Piece::Knight, Tile::D6);
     board.white.place_piece(Piece::Knight, Tile::F6);
     board.black.place_piece(Piece::Rook, Tile::E4);
-    let expected = board.create_move(
-        Tile::D2, 
-        Tile::E4, 
-        Piece::Knight, 
-        Some(Piece::Rook), 
-        None
-    );
+    let expected = board.create_move(Tile::D2, Tile::E4, Piece::Knight, Some(Piece::Rook), None);
 
     let actual = board.move_from_algebraic("Nd2xe4");
 
@@ -289,20 +235,8 @@ fn parse_san_castling() {
     board.white.remove_piece(Tile::D1);
     board.white.remove_piece(Tile::F1);
     board.white.remove_piece(Tile::G1);
-    let short = board.create_move(
-        Tile::E1, 
-        Tile::G1, 
-        Piece::King, 
-        None, 
-        None
-    );
-    let long = board.create_move(
-        Tile::E1, 
-        Tile::C1, 
-        Piece::King, 
-        None, 
-        None
-    );
+    let short = board.create_move(Tile::E1, Tile::G1, Piece::King, None, None);
+    let long = board.create_move(Tile::E1, Tile::C1, Piece::King, None, None);
 
     assert_eq!(Some(short), board.move_from_algebraic("O-O"));
     assert_eq!(Some(long), board.move_from_algebraic("O-O-O"));
@@ -311,13 +245,7 @@ fn parse_san_castling() {
 #[test]
 fn random_test() {
     let board = Board::new_from_fen("8/6p1/3k4/R2n1bp1/1p6/1P3P1P/5KP1/8 w - - 3 35").unwrap();
-    let mov = board.create_move(
-        Tile::A5, 
-        Tile::A7, 
-        Piece::Rook, 
-        None, 
-        None
-    );
+    let mov = board.create_move(Tile::A5, Tile::A7, Piece::Rook, None, None);
 
     println!("{}", board);
 

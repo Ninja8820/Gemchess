@@ -5,7 +5,8 @@ mod constants;
 mod tests;
 
 use crate::{
-    magics::magic_index, Bitboard, Colour, BETWEEN, BISHOP_ATTACKS, BISHOP_MAGICS, KING_ATTACKS, KNIGHT_ATTACKS, ROOK_ATTACKS, ROOK_MAGICS
+    BETWEEN, BISHOP_ATTACKS, BISHOP_MAGICS, Bitboard, Colour, KING_ATTACKS, KNIGHT_ATTACKS,
+    ROOK_ATTACKS, ROOK_MAGICS, magics::magic_index,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -17,7 +18,7 @@ impl Tile {
         Tile(index)
     }
 
-    /// Creates a new tile from a given index, 
+    /// Creates a new tile from a given index,
     /// returning None if the index is outside the board's range
     pub const fn new_index(index: u8) -> Option<Tile> {
         if index >= 64 {
@@ -29,7 +30,9 @@ impl Tile {
     /// Creates a new tile from a given x ( file ) & y ( rank ),
     /// may fail if given out of range coordinates
     pub const fn new_xy(x: u8, y: u8) -> Option<Tile> {
-        if x >= 8 || y >= 8 { return None; }
+        if x >= 8 || y >= 8 {
+            return None;
+        }
         Some(Tile((y * 8) + x))
     }
 
@@ -56,7 +59,7 @@ impl Tile {
             '1'..='8' => (rank_char as u8) - b'1',
             _ => return None,
         };
-        
+
         Some(Tile::new_unchecked((rank << 3) | file))
     }
 
@@ -85,7 +88,7 @@ impl Tile {
         let x = (self.0 % 8) as i8 + dx;
         let y = (self.0 / 8) as i8 + dy;
 
-        if x < 0 || x > 7 || y < 0 || y > 7 { 
+        if !(0..=7).contains(&x) || !(0..=7).contains(&y) {
             return None;
         }
 
@@ -127,9 +130,9 @@ impl Tile {
             Colour::Black => y == 6,
         }
     }
-    
+
     pub fn is_light_square(&self) -> bool {
-        self.0 % 2 == 0
+        self.0.is_multiple_of(2)
     }
 
     // Attack Generation
@@ -164,7 +167,7 @@ impl Tile {
             Colour::Black => ((mask >> 7) & !Bitboard::FILE_A) | ((mask >> 9) & !Bitboard::FILE_H),
         }
     }
-    
+
     pub fn between(&self, to: Tile) -> Bitboard {
         BETWEEN[*self][to]
     }

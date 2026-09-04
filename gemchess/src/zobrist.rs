@@ -2,8 +2,7 @@ use crate::{Bitboard, Board, CastlingRights, Colour, Piece};
 
 pub mod consts;
 use consts::{CASTLING, EN_PASSANT, PIECE_SQUARE, SIDE_TO_MOVE};
-impl Board
-{
+impl Board {
     pub fn to_zobrist_hash(&self) -> Bitboard {
         let mut hash: Bitboard = Bitboard::EMPTY;
 
@@ -14,7 +13,7 @@ impl Board
                 hash ^= PIECE_SQUARE[z_white][t];
             }
             for t in self.black.bb[p as usize] {
-                hash ^= PIECE_SQUARE[z_black][t.into()];
+                hash ^= PIECE_SQUARE[z_black][t];
             }
         }
 
@@ -40,7 +39,7 @@ impl Board
             for t in player.bb[Piece::Pawn as usize] {
                 if t.pawn_attacks(self.turn).get_bit(tile) {
                     let (file, _) = tile.get_coords();
-        
+
                     hash ^= EN_PASSANT[file as usize];
                     break;
                 }

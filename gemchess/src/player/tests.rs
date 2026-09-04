@@ -1,5 +1,4 @@
-
-use crate::{Player, Piece, Tile};
+use crate::{Piece, Player, Tile};
 
 #[test]
 fn new_empty_player() {

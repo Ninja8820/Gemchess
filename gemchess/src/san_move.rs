@@ -1,6 +1,6 @@
 use crate::{Disambig, Piece, Tile};
 
-#[derive(Debug, Clone, PartialEq, Eq, Copy)]
+#[derive(Debug, Clone, PartialEq, Eq, Copy, Hash)]
 #[repr(transparent)]
 pub struct SanMove(u32);
 impl SanMove {
@@ -30,15 +30,15 @@ impl SanMove {
 
     // 24       -> Check    { bool }
     const CHECK_SHIFT: u8 = 24;
-    
+
     // 25       -> Mate     { bool }
     const MATE_SHIFT: u8 = 25;
-    
+
     pub fn new(
-        piece: Piece, 
-        disambig: Option<Disambig>, 
-        capture: bool, 
-        to: Tile, 
+        piece: Piece,
+        disambig: Option<Disambig>,
+        capture: bool,
+        to: Tile,
         promotion: Option<Piece>,
         kingside_castle: bool,
         queenside_castle: bool,
@@ -49,22 +49,20 @@ impl SanMove {
 
         data |= (piece as u32) << Self::PIECE_SHIFT;
         match disambig {
-            Some(d) => {
-                match d {
-                    Disambig::File(f) => {
-                        data |= 0b01 << Self::D_KIND_SHIFT;
-                        data |= (f as u32) << Self::D_FILE_SHIFT;
-                    },
-                    Disambig::Rank(r) => {
-                        data |= 0b10 << Self::D_KIND_SHIFT;
-                        data |= (r as u32) << Self::D_RANK_SHIFT;
-                    },
-                    Disambig::FileRank(tile) => {
-                        data |= 0b11 << Self::D_KIND_SHIFT;
-                        let (file, rank) = tile.get_coords();
-                        data |= (file as u32) << Self::D_FILE_SHIFT;
-                        data |= (rank as u32) << Self::D_RANK_SHIFT;
-                    },
+            Some(d) => match d {
+                Disambig::File(f) => {
+                    data |= 0b01 << Self::D_KIND_SHIFT;
+                    data |= (f as u32) << Self::D_FILE_SHIFT;
+                }
+                Disambig::Rank(r) => {
+                    data |= 0b10 << Self::D_KIND_SHIFT;
+                    data |= (r as u32) << Self::D_RANK_SHIFT;
+                }
+                Disambig::FileRank(tile) => {
+                    data |= 0b11 << Self::D_KIND_SHIFT;
+                    let (file, rank) = tile.get_coords();
+                    data |= (file as u32) << Self::D_FILE_SHIFT;
+                    data |= (rank as u32) << Self::D_RANK_SHIFT;
                 }
             },
             None => data |= 0u32 << Self::D_KIND_SHIFT,
@@ -72,15 +70,13 @@ impl SanMove {
         data |= (capture as u32) << Self::CAP_SHIFT;
         data |= (to.shift() as u32) << Self::TO_SHIFT;
         match promotion {
-            Some(p) => {
-                match p {
-                    Piece::Pawn => panic!("Not a valid promotion piece"),
-                    Piece::Knight => data |= 0b001 << Self::PROMO_SHIFT,
-                    Piece::Bishop => data |= 0b010 << Self::PROMO_SHIFT,
-                    Piece::Rook => data |= 0b011 << Self::PROMO_SHIFT,
-                    Piece::Queen => data |= 0b100 << Self::PROMO_SHIFT,
-                    Piece::King => panic!("Not a valid promotion piece"),
-                }
+            Some(p) => match p {
+                Piece::Pawn => panic!("Not a valid promotion piece"),
+                Piece::Knight => data |= 0b001 << Self::PROMO_SHIFT,
+                Piece::Bishop => data |= 0b010 << Self::PROMO_SHIFT,
+                Piece::Rook => data |= 0b011 << Self::PROMO_SHIFT,
+                Piece::Queen => data |= 0b100 << Self::PROMO_SHIFT,
+                Piece::King => panic!("Not a valid promotion piece"),
             },
             None => data |= 0u32 << Self::PROMO_SHIFT,
         }

@@ -1,7 +1,6 @@
 use crate::CastlingRights;
 
-impl CastlingRights
-{
+impl CastlingRights {
     pub const NONE: CastlingRights = CastlingRights::new(0b0000);
     pub const WHITE_KINGSIDE: CastlingRights = CastlingRights::new(0b0001);
     pub const WHITE_QUEENSIDE: CastlingRights = CastlingRights::new(0b0010);

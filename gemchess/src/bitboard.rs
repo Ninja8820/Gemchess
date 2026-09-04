@@ -1,12 +1,12 @@
 use crate::Tile;
 use std::fmt;
 
+mod bit_manip;
 mod constants;
 #[cfg(test)]
 mod tests;
-mod bit_manip;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Bitboard(u64);
 
 impl Bitboard {

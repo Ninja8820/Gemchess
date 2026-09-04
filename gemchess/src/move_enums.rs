@@ -37,7 +37,6 @@ pub enum GameState {
     InsufficientMaterial,
     FiftyMoveRule,
     ThreeRepetition,
-
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MoveResult {

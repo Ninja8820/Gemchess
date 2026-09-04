@@ -19,12 +19,8 @@ impl Piece {
         Piece::Queen,
         Piece::King,
     ];
-    pub const PROMOTION_PIECES: [Piece; 4] = [
-        Piece::Queen,
-        Piece::Knight,
-        Piece::Rook,
-        Piece::Bishop,
-    ];
+    pub const PROMOTION_PIECES: [Piece; 4] =
+        [Piece::Queen, Piece::Knight, Piece::Rook, Piece::Bishop];
     pub fn from_index(index: usize) -> Self {
         match index {
             0 => Piece::Pawn,
@@ -72,7 +68,11 @@ impl Piece {
             Piece::Queen => 'q',
             Piece::King => 'k',
         };
-        if colour.white() { c.to_ascii_uppercase() } else { c }
+        if colour.white() {
+            c.to_ascii_uppercase()
+        } else {
+            c
+        }
     }
     pub fn to_san_char(&self) -> char {
         match self {
@@ -92,7 +92,7 @@ impl Piece {
             (Piece::Bishop, Colour::Black) => '♗',
             (Piece::Knight, Colour::Black) => '♘',
             (Piece::Pawn, Colour::Black) => '♙',
-            
+
             (Piece::King, Colour::White) => '♚',
             (Piece::Queen, Colour::White) => '♛',
             (Piece::Rook, Colour::White) => '♜',

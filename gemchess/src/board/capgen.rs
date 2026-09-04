@@ -1,7 +1,6 @@
 use crate::{Bitboard, Board, Colour, MoveList, Piece, Tile};
 
-impl Board
-{
+impl Board {
     pub fn generate_legal_captures(&self, colour: Colour, moves: &mut MoveList) {
         let (player, _) = self.get_players(colour);
         if player.king_tile().is_none() {
@@ -56,21 +55,42 @@ impl Board
         for bishop_tile in player.bb[Piece::Bishop as usize] {
             let pin_mask = pinned.get(&bishop_tile).copied().unwrap_or(Bitboard::ALL);
             let move_mask = pin_mask & targets;
-            self.generate_sliding_capture_moves(bishop_tile, colour, false, true, Some(move_mask), moves);
+            self.generate_sliding_capture_moves(
+                bishop_tile,
+                colour,
+                false,
+                true,
+                Some(move_mask),
+                moves,
+            );
         }
 
         // Rooks
         for rook_tile in player.bb[Piece::Rook as usize] {
             let pin_mask = pinned.get(&rook_tile).copied().unwrap_or(Bitboard::ALL);
             let move_mask = pin_mask & targets;
-            self.generate_sliding_capture_moves(rook_tile, colour, true, false, Some(move_mask), moves);
+            self.generate_sliding_capture_moves(
+                rook_tile,
+                colour,
+                true,
+                false,
+                Some(move_mask),
+                moves,
+            );
         }
 
         // Queens
         for queen_tile in player.bb[Piece::Queen as usize] {
             let pin_mask = pinned.get(&queen_tile).copied().unwrap_or(Bitboard::ALL);
             let move_mask = pin_mask & targets;
-            self.generate_sliding_capture_moves(queen_tile, colour, true, true, Some(move_mask), moves);
+            self.generate_sliding_capture_moves(
+                queen_tile,
+                colour,
+                true,
+                true,
+                Some(move_mask),
+                moves,
+            );
         }
     }
     pub fn generate_king_capture_moves(&self, tile: Tile, colour: Colour, moves: &mut MoveList) {
@@ -94,8 +114,14 @@ impl Board
                 None,
             ));
         }
-    }  
-    pub fn generate_pawn_capture_moves(&self, tile: Tile, colour: Colour, mask: Option<Bitboard>, moves: &mut MoveList) {
+    }
+    pub fn generate_pawn_capture_moves(
+        &self,
+        tile: Tile,
+        colour: Colour,
+        mask: Option<Bitboard>,
+        moves: &mut MoveList,
+    ) {
         for maybe_target in [
             tile.left(colour).and_then(|t| t.forward(colour)),
             tile.right(colour).and_then(|t| t.forward(colour)),
@@ -106,7 +132,9 @@ impl Board
             };
 
             // --- En Passant Capture ---
-            if Some(to) == self.en_passant && mask.map_or(true, |mask| mask.get_bit(to.backward(colour).unwrap())) {
+            if Some(to) == self.en_passant
+                && mask.is_none_or(|mask| mask.get_bit(to.backward(colour).unwrap()))
+            {
                 let king_tile = if colour.white() {
                     self.white.bb[Piece::King as usize].to_bit().unwrap()
                 } else {
@@ -114,22 +142,37 @@ impl Board
                 };
                 let occupied = self.occupied();
                 let (_, opponent) = self.get_players(colour);
-                let enemy_sliders = opponent.bb[Piece::Rook as usize] | opponent.bb[Piece::Queen as usize];
+                let enemy_sliders =
+                    opponent.bb[Piece::Rook as usize] | opponent.bb[Piece::Queen as usize];
 
-                if !Self::is_illegal_en_passant_discovery(tile, to, king_tile, occupied, enemy_sliders) {
+                if !Self::is_illegal_en_passant_discovery(
+                    tile,
+                    to,
+                    king_tile,
+                    occupied,
+                    enemy_sliders,
+                ) {
                     moves.push(self.create_move(tile, to, Piece::Pawn, Some(Piece::Pawn), None));
                 }
                 continue;
             }
 
             // --- Normal Capture ---
-            if self.is_square_occupied_by_enemy(to, colour) && mask.map_or(true, |mask| mask.get_bit(to)) {
+            if self.is_square_occupied_by_enemy(to, colour)
+                && mask.is_none_or(|mask| mask.get_bit(to))
+            {
                 let captured = self.get_piece_at_tile(to).map(|(p, _)| p);
                 self.try_push_pawn_move(tile, to, colour, captured, moves);
             }
         }
     }
-    pub fn generate_knight_capture_moves(&self, tile: Tile, colour: Colour, mask: Option<Bitboard>, moves: &mut MoveList) {
+    pub fn generate_knight_capture_moves(
+        &self,
+        tile: Tile,
+        colour: Colour,
+        mask: Option<Bitboard>,
+        moves: &mut MoveList,
+    ) {
         let mut attacks = tile.knight_attacks();
         if let Some(m) = mask {
             attacks &= m;
@@ -151,7 +194,15 @@ impl Board
             ));
         }
     }
-    pub fn generate_sliding_capture_moves(&self, tile: Tile, colour: Colour, straight: bool, diagonal: bool, mask: Option<Bitboard>, moves: &mut MoveList) {
+    pub fn generate_sliding_capture_moves(
+        &self,
+        tile: Tile,
+        colour: Colour,
+        straight: bool,
+        diagonal: bool,
+        mask: Option<Bitboard>,
+        moves: &mut MoveList,
+    ) {
         let mut attacks = self.generate_sliding_attacks(tile, straight, diagonal, None);
         if let Some(m) = mask {
             attacks &= m;

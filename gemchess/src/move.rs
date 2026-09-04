@@ -1,6 +1,6 @@
 use crate::{CastlingRights, Piece, Tile};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Default)]
 #[repr(transparent)]
 pub struct Move(u64);
 
@@ -94,7 +94,7 @@ impl Move {
     pub fn capture(&self) -> Option<Piece> {
         let v = (self.0 >> Self::CAPTURE_SHIFT) & 0xF;
         if v == 0 {
-            return None
+            None
         } else {
             Some(Piece::from_index((v - 1) as usize))
         }
@@ -102,7 +102,7 @@ impl Move {
     pub fn promoted_to(&self) -> Option<Piece> {
         let v = (self.0 >> Self::PROMO_SHIFT) & 0xF;
         if v == 0 {
-            return None
+            None
         } else {
             Some(Piece::from_index((v - 1) as usize))
         }
@@ -122,11 +122,5 @@ impl Move {
     }
     pub fn prev_half_moves(&self) -> u32 {
         ((self.0 >> Self::PREV_HALF_MOVE_SHIFT) & 0xFF) as u32
-    }
-}
-
-impl Default for Move {
-    fn default() -> Self {
-        Self(0)
     }
 }
