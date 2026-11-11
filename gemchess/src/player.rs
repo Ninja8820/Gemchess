@@ -1,0 +1,105 @@
+use crate::{Bitboard, Piece, Tile};
+
+mod constants;
+#[cfg(test)]
+mod tests;
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Player {
+    pub bb: [Bitboard; 6],
+    pub pieces: Bitboard,
+}
+
+impl Player {
+    pub fn new_empty() -> Self {
+        Self {
+            bb: [Bitboard::EMPTY; 6],
+            pieces: Bitboard::EMPTY,
+        }
+    }
+    /// Create a new player with the standard white piece positions.
+    pub fn new_white() -> Self {
+        Self {
+            bb: [
+                Player::WHITE_PAWNS,
+                Player::WHITE_KNIGHTS,
+                Player::WHITE_BISHOPS,
+                Player::WHITE_ROOKS,
+                Player::WHITE_QUEEN,
+                Player::WHITE_KING,
+            ],
+            pieces: Player::WHITE_PIECES,
+        }
+    }
+
+    /// Create a new player with the standard black piece positions.
+    pub fn new_black() -> Self {
+        Self {
+            bb: [
+                Player::BLACK_PAWNS,
+                Player::BLACK_KNIGHTS,
+                Player::BLACK_BISHOPS,
+                Player::BLACK_ROOKS,
+                Player::BLACK_QUEEN,
+                Player::BLACK_KING,
+            ],
+            pieces: Player::BLACK_PIECES,
+        }
+    }
+
+    // Modifications
+    /// Attempts to remove any piece at a given tile, returning
+    /// what type of piece was removed, if any
+    pub fn remove_piece(&mut self, tile: Tile) -> Option<Piece> {
+        Piece::ALL_PIECES
+            .into_iter()
+            .find(|&piece| self.remove_piece_type(piece, tile))
+    }
+
+    /// Attempts to remove a specific piece type from a tile
+    /// returning whether or not a piece is removed
+    pub fn remove_piece_type(&mut self, piece: Piece, tile: Tile) -> bool {
+        if self.bb[piece as usize].get_bit(tile) {
+            self.bb[piece as usize].set_bit(tile, false);
+            self.pieces.set_bit(tile, false);
+            return true;
+        }
+
+        false
+    }
+
+    pub fn place_piece(&mut self, piece: Piece, tile: Tile) {
+        self.bb[piece as usize].set_bit(tile, true);
+        self.pieces.set_bit(tile, true);
+    }
+
+    pub fn move_piece(&mut self, from: Tile, to: Tile) {
+        if let Some(p) = self.remove_piece(from) {
+            self.place_piece(p, to);
+        }
+    }
+
+    // Accessors
+
+    /// Returns all occupied tiles, excluding the king
+    pub fn attackers(&self) -> Bitboard {
+        self.pieces & !self.bb[Piece::King as usize]
+    }
+
+    /// Unsafely returns the king tile, assuming exactly 1 king
+    pub fn king_tile(&self) -> Option<Tile> {
+        self.bb[Piece::King as usize].to_bit()
+    }
+
+    pub fn get_piece(&self, tile: Tile) -> Option<Piece> {
+        if !self.pieces.get_bit(tile) {
+            return None;
+        }
+        for i in 0..self.bb.len() {
+            if self.bb[i].get_bit(tile) {
+                return Some(Piece::from_index(i));
+            }
+        }
+        None
+    }
+}
